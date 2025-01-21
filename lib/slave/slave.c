@@ -10,6 +10,7 @@
 #include "esp_err.h"
 #include "mbcontroller.h"       // for mbcontroller defines and api
 #include "modbus_params.h"      // for modbus parameters structures
+#include "esp_modbus_slave.h"
 #include "esp_log.h"            // for log_write
 #include "sdkconfig.h"
 
