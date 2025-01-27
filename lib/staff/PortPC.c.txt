@@ -1,0 +1,287 @@
+//----------------------------------------------------------------------------
+
+//Модуль реализации протокола обмена с PC (USART0)
+
+//----------------------------------------------------------------------------
+
+/*
+  Протокол обмена:
+  Для обмена данными с PC используется протокол WAKE.
+  Параметры настройки UART следующие:
+  Скорость обмена  - 115200 бод
+*/
+
+//----------------------------------------------------------------------------
+
+#include <Main.h>
+#include <PortPC.h>
+#include <Wake.h>
+#include <Commands.h>
+
+//----------------------------- Константы: -----------------------------------
+
+#define PC_BAUD 115200 //скорость обмена с PC
+
+#define UBRR0V (int)((FCLK * 1000000.0)/(16.0 * PC_BAUD) - 0.5) //делитель
+
+#define PC_RX_ADDR 0   //адрес при приеме данных от PC
+#define PC_TX_ADDR 0   //адрес, передаваемый в PC
+
+//------------------------------- Переменные: --------------------------------
+
+char Pc_Rx_Sta,        //состояние процесса приема пакета
+     Pc_Rx_Pre,        //предыдущий принятый байт
+     Pc_Rx_Add,        //адрес, с которым сравнивается принятый
+     Pc_Rx_Cmd,        //принятая команда
+     Pc_Rx_Nbt,        //принятое количество байт в пакете
+     Pc_Rx_Dat[FRAME], //массив принятых данных
+     Pc_Rx_Crc,        //контрольная сумма принимаемого пакета
+     Pc_Rx_Ptr;        //указатель на массив принимаемых данных
+
+char Command;          //код команды на выполнение
+
+char Pc_Tx_Sta,        //состояние процесса передачи пакета
+     Pc_Tx_Pre,        //предыдущий переданный байт
+     Pc_Tx_Add,        //адрес, передававемый в пакете
+     Pc_Tx_Cmd,        //команда, передаваемая в пакете
+     Pc_Tx_Nbt,        //количество байт данных в пакете
+     Pc_Tx_Dat[FRAME], //массив данных для передачи
+     Pc_Tx_Crc,        //контрольная сумма передаваемого пакета
+     Pc_Tx_Ptr;        //указатель на массив передаваемых данных
+
+//-------------------------------- Функции: ----------------------------------
+
+#pragma vector = USART0_TXC_vect
+__interrupt void PC_Tx(void);    //прерывание после передачи байта
+#pragma vector = USART0_RXC_vect
+__interrupt void PC_Rx(void);    //прерывание после приема байта
+void Do_Crc8(char b, char *crc); //вычисление контрольной суммы
+
+//------------------------ Инициализация UART: -------------------------------
+
+void Pc_Init_Port(void)
+{
+  UCSR0C = (1<<UCSZ01) | (1<<UCSZ00); //8-битная посылка
+  UBRR0L = LO(UBRR0V); //задание скорости обмена
+  UBRR0H = HI(UBRR0V);
+  //разрешение прерываний по приему и передаче, разрешение приема и передачи
+  UCSR0B = (1<<RXCIE0) | (1<<TXCIE0) | (1<<RXEN0) | (1<<TXEN0);
+
+  Pc_Rx_Add = PC_RX_ADDR; //адрес на прием
+  Pc_Tx_Add = PC_TX_ADDR; //адрес на передачу
+  Pc_Rx_Sta = WAIT_FEND;  //ожидание пакета
+  Pc_Tx_Sta = SEND_IDLE;  //ничего пока не передаем
+  Command = CMD_NOP;      //нет команды на выполнение
+}
+
+//------------------- Прерывание UART после приема байта: --------------------
+
+#pragma vector = USART0_RXC_vect
+__interrupt void PC_Rx(void)
+{
+  char error_flags = (UCSR0A & (1<<FE0)); //чтение флагов ошибок
+  char data_byte = UDR0;              //чтение данных
+
+  if(error_flags)                     //если обнаружены ошибки при приеме байта
+  {
+    Pc_Rx_Sta = WAIT_FEND;            //ожидание нового пакета
+    Command = CMD_ERR;                //рапортуем об ошибке
+    return;
+  }
+
+  if(data_byte == FEND)               //если обнаружено начало фрейма,
+  {
+    Pc_Rx_Pre = data_byte;            //то сохранение пре-байта,
+    Pc_Rx_Crc = CRC_INIT;             //инициализация CRC,
+    Pc_Rx_Sta = WAIT_ADDR;            //сброс указателя данных,
+    Do_Crc8(data_byte, &Pc_Rx_Crc);   //обновление CRC,
+    return;                           //выход
+  }
+
+  if(Pc_Rx_Sta == WAIT_FEND)          //-----> если ожидание FEND,
+    return;                           //то выход
+
+  char Pre = Pc_Rx_Pre;               //сохранение старого пре-байта
+  Pc_Rx_Pre = data_byte;              //обновление пре-байта
+  if(Pre == FESC)                     //если пре-байт равен FESC,
+  {
+    if(data_byte == TFESC)            //а байт данных равен TFESC,
+      data_byte = FESC;               //то заменить его на FESC
+    else if(data_byte == TFEND)       //если байт данных равен TFEND,
+           data_byte = FEND;          //то заменить его на FEND
+         else
+         {
+           Pc_Rx_Sta = WAIT_FEND;     //для всех других значений байта данных,
+           Command = CMD_ERR;         //следующего за FESC, ошибка
+           return;
+         }
+  }
+  else
+  {
+    if(data_byte == FESC)             //если байт данных равен FESC, он просто
+      return;                         //запоминается в пре-байте
+  }
+
+  switch(Pc_Rx_Sta)
+  {
+  case WAIT_ADDR:                     //-----> ожидание приема адреса
+    {
+      if(data_byte & 0x80)            //если бит 7 данных не равен нулю, то это адрес
+      {
+        data_byte = data_byte & 0x7F; //обнуляем бит 7, получаем истинный адрес
+        if(data_byte == 0 || data_byte == Pc_Rx_Add) //если нулевой или верный адрес,
+        {
+          Do_Crc8(data_byte, &Pc_Rx_Crc); //то обновление CRC и
+          Pc_Rx_Sta = WAIT_CMD;       //переходим к приему команды
+          break;
+        }
+        Pc_Rx_Sta = WAIT_FEND;        //адрес не совпал, ожидание нового пакета
+        break;
+      }                               //если бит 7 данных равен нулю, то
+      Pc_Rx_Sta = WAIT_CMD;           //сразу переходим к приему команды
+    }
+  case WAIT_CMD:                      //-----> ожидание приема команды
+    {
+      if(data_byte & 0x80)            //проверка бита 7 данных
+      {
+        Pc_Rx_Sta = WAIT_FEND;        //если бит 7 не равен нулю,
+        Command = CMD_ERR;            //то ошибка
+        break;
+      }
+      Pc_Rx_Cmd = data_byte;          //сохранение команды
+      Do_Crc8(data_byte, &Pc_Rx_Crc); //обновление CRC
+      Pc_Rx_Sta = WAIT_NBT;           //переходим к приему количества байт
+      break;
+    }
+  case WAIT_NBT:                      //-----> ожидание приема количества байт
+    {
+      if(data_byte > FRAME)           //если количество байт > FRAME,
+      {
+        Pc_Rx_Sta = WAIT_FEND;
+        Command = CMD_ERR;            //то ошибка
+        break;
+      }
+      Pc_Rx_Nbt = data_byte;
+      Do_Crc8(data_byte, &Pc_Rx_Crc); //обновление CRC
+      Pc_Rx_Ptr = 0;                  //обнуляем указатель данных
+      Pc_Rx_Sta = WAIT_DATA;          //переходим к приему данных
+      break;
+    }
+  case WAIT_DATA:                     //-----> ожидание приема данных
+    {
+      if(Pc_Rx_Ptr < Pc_Rx_Nbt)       //если не все данные приняты,
+      {
+        Pc_Rx_Dat[Pc_Rx_Ptr++] = data_byte; //то сохранение байта данных,
+        Do_Crc8(data_byte, &Pc_Rx_Crc);  //обновление CRC
+        break;
+      }
+      if(data_byte != Pc_Rx_Crc)      //если приняты все данные, то проверка CRC
+      {
+        Pc_Rx_Sta = WAIT_FEND;        //если CRC не совпадает,
+        Command = CMD_ERR;            //то ошибка
+        break;
+      }
+      Pc_Rx_Sta = WAIT_FEND;          //прием пакета завершен,
+      Command = Pc_Rx_Cmd;            //загрузка команды на выполнение
+      break;
+    }
+  }
+}
+
+//------------------ Прерывание UART после передачи байта: -------------------
+
+#pragma vector = USART0_TXC_vect
+__interrupt void Tx_PC(void)
+{
+  char data_byte;
+
+  if(Pc_Tx_Pre == FEND)               //если производится стаффинг,
+  {
+    data_byte = TFEND;                //передача TFEND вместо FEND
+    Pc_Tx_Pre = data_byte;
+    UDR0 = data_byte;
+    return;
+  }
+  if(Pc_Tx_Pre == FESC)               //если производится стаффинг,
+  {
+    data_byte = TFESC;                //передача TFESC вместо FESC
+    Pc_Tx_Pre = data_byte;
+    UDR0 = data_byte;
+    return;
+  }
+
+  switch(Pc_Tx_Sta)
+  {
+  case SEND_ADDR:                     //-----> передача адреса
+    {
+      if(Pc_Tx_Add)                   //если адрес не равен нулю,
+      {
+        data_byte = Pc_Tx_Add | 0x80; //то он передается (бит 7 равен единице)
+        Pc_Tx_Sta = SEND_CMD;
+        break;
+      }
+      else
+        Pc_Tx_Sta = SEND_CMD;         //иначе сразу передаем команду
+    }
+  case SEND_CMD:                      //-----> передача команды
+    {
+      data_byte = Pc_Tx_Cmd & 0x7F;
+      Pc_Tx_Sta = SEND_NBT;
+      break;
+    }
+  case SEND_NBT:                      //-----> передача количества байт
+    {
+      data_byte = Pc_Tx_Nbt;
+      Pc_Tx_Sta = SEND_DATA;
+      Pc_Tx_Ptr = 0;                  //обнуление указателя данных для передачи
+      break;
+    }
+  case SEND_DATA:                     //-----> передача данных
+    {
+      if(Pc_Tx_Ptr < Pc_Tx_Nbt)
+        data_byte = Pc_Tx_Dat[Pc_Tx_Ptr++];
+      else
+      {
+        data_byte = Pc_Tx_Crc;        //передача CRC
+        Pc_Tx_Sta = SEND_CRC;
+      }
+      break;
+    }
+  default:
+    {
+//      Port_DIR_0;                     //переключение RS-485 на прием
+      Pc_Tx_Sta = SEND_IDLE;          //передача пакета завершена
+      return;
+    }
+  }
+
+  Do_Crc8(data_byte, &Pc_Tx_Crc);     //обновление CRC
+  Pc_Tx_Pre = data_byte;              //сохранение пре-байта
+  if(data_byte == FEND || data_byte == FESC)
+    data_byte = FESC;                 //передача FESC, если нужен стаффинг
+  UDR0 = data_byte;
+}
+
+//--------------------- Вычисление контрольной суммы -------------------------
+
+void Do_Crc8(char b, char *crc)
+{
+  for(char i = 0; i < 8; b = b >> 1, i++)
+    if((b ^ *crc) & 1) *crc = ((*crc ^ 0x18) >> 1) | 0x80;
+     else *crc = (*crc >> 1) & ~0x80;
+}
+
+//------------------------- Передача пакета ----------------------------------
+
+void Pc_Tx_Frame(void)
+{
+  char data_byte = FEND;
+  Pc_Tx_Crc = CRC_INIT;           //инициализация CRC,
+  Do_Crc8(data_byte, &Pc_Tx_Crc); //обновление CRC
+  Pc_Tx_Sta = SEND_ADDR;
+  Pc_Tx_Pre = TFEND;
+//  Port_DIR_1;                     //переключение RS-485 на передачу
+  UDR0 = data_byte;
+}
+
+//----------------------------------------------------------------------------

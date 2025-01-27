@@ -22,6 +22,7 @@
 #include "esp_log.h"
 #include "sdkconfig.h"
 #include "staff.h"
+#include "wake.h"
 
 
 #define TAG "RS485_SPNET"
