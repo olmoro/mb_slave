@@ -1,6 +1,7 @@
 /*=====================================================================================
  * Description:
  *   FreeModbus Slave ESP32
+ * https://github.com/espressif/esp-idf/blob/master/examples/protocols/modbus/serial/mb_slave/sdkconfig.defaults
  *====================================================================================*/
 
 

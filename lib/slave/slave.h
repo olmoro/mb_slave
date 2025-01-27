@@ -1,6 +1,8 @@
 /*=====================================================================================
  * Description:
  *   FreeModbus Slave ESP32
+ *  Kconfig - настройки MODBUS
+ *  E:\PlatformIO\logika\mb_slave\managed_components\espressif__esp-modbus\Kconfig
  *====================================================================================*/
 #ifndef _SLAVE_H_
 #define _SLAVE_H_
