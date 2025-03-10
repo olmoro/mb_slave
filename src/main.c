@@ -20,6 +20,6 @@ void app_main(void)
   vTaskDelay(1);
 
   // Запуск службы staff
-  staffTaskStart();
-  vTaskDelay(1);
+ // staffTaskStart();
+ // vTaskDelay(1);
 }

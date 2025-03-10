@@ -9,13 +9,13 @@ dependencies:
     component_hash: null
     source:
       type: idf
-    version: 5.3.1
+    version: 5.4.0
   mb_example_common:
     component_hash: null
     source:
-      path: C:\Users\olmor\.platformio\packages\framework-espidf\examples\protocols\modbus\mb_example_common
+      path: C:\Users\Olmoro\.platformio\packages\framework-espidf\examples\protocols\modbus\mb_example_common
       type: local
     version: '*'
-manifest_hash: d3ad6b1d47bb992599587f777ee2660a14e4af3a9bb3de969403e29f4bb4345f
+manifest_hash: 50828afaf21f1f66b370e46446507ca7442715be35dd0b46767c317712cca583
 target: esp32
 version: 1.0.0
