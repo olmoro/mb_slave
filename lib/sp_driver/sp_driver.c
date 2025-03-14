@@ -12,12 +12,31 @@
 #include "esp_system.h"
 #include "nvs_flash.h"
 #include "driver/uart.h"
+#include "driver/gpio.h"
 #include "freertos/queue.h"
 #include "esp_log.h"
 #include "sdkconfig.h"
 
-
 #define PACKET_READ_TICS        (100 / portTICK_PERIOD_MS)
+
+const uart_port_t uart_num = SP_PORT_NUM;
+uart_config_t uart_config = {
+    .baud_rate = SP_DEV_SPEED,  // Скорость передачи в Бодах
+    .data_bits = UART_DATA_8_BITS,  // Количество переданных битов
+    .parity = UART_PARITY_DISABLE,  // Контроль четности
+    .stop_bits = UART_STOP_BITS_1,  // Количество стоп-битов
+    .flow_ctrl = UART_HW_FLOWCTRL_CTS_RTS,  // Режим Аппаратного управления потоком
+    .rx_flow_ctrl_thresh = 122,
+};
+
+// Configure UART parameters
+ESP_ERROR_CHECK(uart_param_config(uart_num, &uart_config));
+
+
+
+
+
+// ==============================================================================
 
 char rxSta;          // состояние процесса приема пакета
 char rxPre;          // предыдущий принятый байт

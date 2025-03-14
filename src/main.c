@@ -10,8 +10,8 @@
 #include "driver/uart.h"
 #include "driver/gpio.h"
 #include "slave.h"
+#include "sp_uart.h"
 #include "staff.h"
-
 
 void app_main(void)
 {
@@ -19,7 +19,7 @@ void app_main(void)
   slaveTaskStart();
   vTaskDelay(1);
 
-  // Запуск службы staff
- // staffTaskStart();
- // vTaskDelay(1);
+  // Запуск службы проверки sp
+  spTaskStart();
+  vTaskDelay(1);
 }

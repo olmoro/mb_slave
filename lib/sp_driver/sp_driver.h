@@ -6,6 +6,17 @@
 
 #include <stdint.h>
 
+#define SP_PORT_NUM (CONFIG_SP_UART_PORT_NUM)          // Number of UART port used for connection
+#define SP_DEV_SPEED (CONFIG_SP_UART_BAUD_RATE)        // The communication speed of the UART
+#define SP_TASK_STACK_SIZE (CONFIG_SP_TASK_STACK_SIZE) // =3072
+#define SP_UART_RXD (CONFIG_SP_UART_RXD)               // =25
+#define SP_UART_TXD (CONFIG_SP_UART_TXD)               // =26
+#define SP_UART_RTS (CONFIG_SP_UART_RTS)               // =33
+// #define SP_UART_CTS (CONFIG_SP_UART_NO_CHANGE)
+
+#define BUF_SIZE (1024)
+
+
 // Константы протокола
 #define SOH 0x01        // Байт начала заголовка
 #define ISI 0x1F        // Байт указателя кода функции
