@@ -38,6 +38,14 @@
 #define MB_READ_WRITE_MASK                  (MB_READ_MASK | MB_WRITE_MASK)
 
 
+#ifdef __cplusplus
+  extern "C" {
+#endif
+
 void slaveTaskStart();
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif  // _SLAVE_H_

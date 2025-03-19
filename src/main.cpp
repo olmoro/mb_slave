@@ -17,7 +17,7 @@
 #include "staff.h"
 
 
-void app_main(void)
+extern "C" void app_main(void)
 {
     /* Инициализируем логи и выводим версию прошивки */
     // rlog_empty();
