@@ -12,8 +12,9 @@
 // ------------------------------------------------------------------------
 //                              Версии 
 // ------------------------------------------------------------------------
-#define APP_VERSION "MB_SLAVE 20250310.05"
-// 20250314.05:  Test stuffing                RAM: 6.4% Flash: 14.7%
+#define APP_VERSION "MB_SLAVE 20250319.06"
+// 20250319.06:  Test RGB                          RAM: 6.4% Flash: 14.9%
+// 20250314.05:  Test stuffing                     RAM: 6.4% Flash: 14.7%
 // 20250310.04:  Test spUART TX-OK                 RAM: 6.4% Flash: 14.7%
 // 20250310.03:  Test spUART RX-OK    TX-NO        RAM: 6.4% Flash: 14.7%
 // 20250310.02:  Драйвер (объявления)              RAM: 5.3% Flash: 14.7%
@@ -26,12 +27,19 @@
 // ------------------------------------------------------------------------
   // Плата SPN.55
   // Светодиоды
-  #define CONFIG_GPIO_LED_RED        4    // Красный, катод на GND (7mA)
-  #define CONFIG_GPIO_LED_GREEN      2    // Зелёный, катод на GND (5mA)
-  #define CONFIG_GPIO_LED_BLUE      27    // Синий,   катод на GND (4mA)
+#define RGB_RED_GPIO 4   // Красный, катод на GND (7mA)
+#define RGB_GREEN_GPIO 2 // Зелёный, катод на GND (5mA)
+#define RGB_BLUE_GPIO 27 // Синий,   катод на GND (4mA)
 
-  // Входы
-  #define CONFIG_GPIO_IR            19    // Вход ИК датчика
+// Входы
+#define CONFIG_GPIO_IR 19 // Вход ИК датчика
+
+  // #define CONFIG_GPIO_LED_RED        4    // Красный, катод на GND (7mA)
+  // #define CONFIG_GPIO_LED_GREEN      2    // Зелёный, катод на GND (5mA)
+  // #define CONFIG_GPIO_LED_BLUE      27    // Синий,   катод на GND (4mA)
+
+  // // Входы
+  // #define CONFIG_GPIO_IR            19    // Вход ИК датчика
 
 
     // // UART1

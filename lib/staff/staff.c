@@ -22,7 +22,7 @@
 #include "esp_log.h"
 #include "sdkconfig.h"
 #include "staff.h"
-#include "wake.h"
+//#include "wake.h"
 
 
 #include <stdint.h>
