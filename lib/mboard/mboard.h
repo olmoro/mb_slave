@@ -1,6 +1,6 @@
 /*
   Файл   mboard.h
-  Проект fsm25
+  Проект
   pcb: spn.55
 */
 
@@ -10,32 +10,34 @@
 #include <stdint.h>
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
-#include "freertos/queue.h" 
+#include "freertos/queue.h"
 #include "driver/gpio.h"
 
-//typedef QueueHandle_t ledQueue_t;
-
-// With this callback function, you can control the LEDs connected via the GPIO expansion boards
-//typedef void (*ledCustomControl_t) (int8_t ledGPIO, bool ledValue);
-
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
-// Create LED control task
-//ledQueue_t ledTaskCreate(int8_t ledGPIO, bool ledHigh, bool blinkPriority, const char* taskName, const uint32_t taskStackSize, ledCustomControl_t customControl);
+    class MBoard
+    {
+    public:
+        MBoard();
+        ~MBoard();
 
-void boardInit();
+        void boardInit();
 
-void ledsOn();
-void ledsRed();
-void ledsGreen();
-void ledsBlue();
-void ledsOff();
+        void ledsOn();
+        void ledsRed();
+        void ledsGreen();
+        void ledsBlue();
+        void ledsOff();
 
-void ledRedToggle();
-void ledGreenToggle();
-void ledBlueToggle();
+        void ledRedToggle();
+        void ledGreenToggle();
+        void ledBlueToggle();
+
+    private:
+    };
 
 #ifdef __cplusplus
 }

@@ -16,6 +16,7 @@
 #include "sp_uart.h"
 #include "staff.h"
 
+static MBoard Board;
 
 extern "C" void app_main(void)
 {
@@ -31,7 +32,7 @@ extern "C" void app_main(void)
     vTaskDelay(1);
 
     /* Инициализация периферии esp32 (светодиодов и др.) */
-    boardInit(); // ledSysOn(false);
+    Board.boardInit(); // ledSysOn(false);
     vTaskDelay(1);
 
     /* Запуск службы modbus_slave */
@@ -42,10 +43,12 @@ extern "C" void app_main(void)
     spTaskStart();
     vTaskDelay(1);
 
-    while(1) {
-    ledRedToggle();
-    ledGreenToggle();
-    ledBlueToggle();
-    vTaskDelay(1000 / portTICK_PERIOD_MS);
+    /* Проверка RGB светодиода */
+    while (1)
+    {
+        Board.ledRedToggle();
+        Board.ledGreenToggle();
+        Board.ledBlueToggle();
+        vTaskDelay(1000 / portTICK_PERIOD_MS);
     }
 }

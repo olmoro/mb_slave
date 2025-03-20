@@ -12,15 +12,12 @@
 // ------------------------------------------------------------------------
 //                              Версии 
 // ------------------------------------------------------------------------
-#define APP_VERSION "MB_SLAVE 20250319.07"
-// 20250319.07:  main.cpp +extern "C"              RAM: 6.4% Flash: 14.9%
-// 20250319.06:  Test RGB                          RAM: 6.4% Flash: 14.9%
-// 20250314.05:  Test stuffing                     RAM: 6.4% Flash: 14.7%
-// 20250310.04:  Test spUART TX-OK                 RAM: 6.4% Flash: 14.7%
-// 20250310.03:  Test spUART RX-OK    TX-NO        RAM: 6.4% Flash: 14.7%
-// 20250310.02:  Драйвер (объявления)              RAM: 5.3% Flash: 14.7%
-// 20250310.01:  Создание статической задачи       RAM: 5.3% Flash: 14.7%
-// 20250310.00:            OK                      RAM: 5.3% Flash: 
+#define APP_VERSION "MB_SLAVE 20250320.09"
+// 20250320.09:                                     RAM: 6.5% Flash: 14.9%
+// 20250320.08:  +mboard                            RAM: 6.4% Flash: 14.9%
+// 20250319.07:  main.cpp +extern "C"               RAM: 6.4% Flash: 14.9%
+// 20250319.06:  Test RGB                           RAM: 6.4% Flash: 14.9%
+// 20250314.05:  Test stuffing                      RAM: 6.4% Flash: 14.7%
 
 
 // ------------------------------------------------------------------------
@@ -35,14 +32,7 @@
 // Входы
 #define CONFIG_GPIO_IR 19 // Вход ИК датчика
 
-  // #define CONFIG_GPIO_LED_RED        4    // Красный, катод на GND (7mA)
-  // #define CONFIG_GPIO_LED_GREEN      2    // Зелёный, катод на GND (5mA)
-  // #define CONFIG_GPIO_LED_BLUE      27    // Синий,   катод на GND (4mA)
-
-  // // Входы
-  // #define CONFIG_GPIO_IR            19    // Вход ИК датчика
-
-
+ 
     // // UART1
     // #define CONFIG_UART1_RXD          25
     // #define CONFIG_UART1_TXD          26
