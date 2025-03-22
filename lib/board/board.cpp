@@ -1,10 +1,10 @@
 /*
   Методы работы с аппаратными ресурсами платы (упрощённый вариант)
   pcb: spn.55
-  20.03.2025
+  22.03.2025
 */
 
-#include "mboard.h"
+#include "board.h"
 #include "project_config.h"
 #include <stdio.h>
 #include "driver/gpio.h"
@@ -14,17 +14,13 @@
 #include <freertos/task.h>
 #include "sdkconfig.h"
 
-static const char *logTAG = "MBOARD";
+static const char *logTAG = "BOARD";
 
 gpio_num_t _rgb_red_gpio = static_cast<gpio_num_t>(RGB_RED_GPIO);
 gpio_num_t _rgb_green_gpio = static_cast<gpio_num_t>(RGB_GREEN_GPIO);
 gpio_num_t _rgb_blue_gpio = static_cast<gpio_num_t>(RGB_BLUE_GPIO);
 
-MBoard::MBoard() {}
-
-MBoard::~MBoard() {}
-
-void MBoard::boardInit()
+void boardInit()
 {
     /* Инициализация GPIO (push/pull output) */
     gpio_reset_pin(_rgb_red_gpio);
@@ -40,39 +36,39 @@ void MBoard::boardInit()
     gpio_set_level(_rgb_blue_gpio, 0);
 }
 
-void MBoard::ledsOn()
+void ledsOn()
 {
     gpio_set_level(_rgb_red_gpio, 1);
     gpio_set_level(_rgb_green_gpio, 1);
     gpio_set_level(_rgb_blue_gpio, 1);
 }
-void MBoard::ledsRed()
+void ledsRed()
 {
     gpio_set_level(_rgb_red_gpio, 1);
     gpio_set_level(_rgb_green_gpio, 0);
     gpio_set_level(_rgb_blue_gpio, 0);
 }
-void MBoard::ledsGreen()
+void ledsGreen()
 {
     gpio_set_level(_rgb_red_gpio, 0);
     gpio_set_level(_rgb_green_gpio, 1);
     gpio_set_level(_rgb_blue_gpio, 0);
 }
-void MBoard::ledsBlue()
+void ledsBlue()
 {
     gpio_set_level(_rgb_red_gpio, 0);
     gpio_set_level(_rgb_green_gpio, 0);
     gpio_set_level(_rgb_blue_gpio, 1);
 }
 
-void MBoard::ledsOff()
+void ledsOff()
 {
     gpio_set_level(_rgb_red_gpio, 0);
     gpio_set_level(_rgb_green_gpio, 0);
     gpio_set_level(_rgb_blue_gpio, 0);
 }
 
-void MBoard::ledRedToggle()
+void ledRedToggle()
 {
     if (gpio_get_level(_rgb_red_gpio))
         gpio_set_level(_rgb_red_gpio, 0);
@@ -80,7 +76,7 @@ void MBoard::ledRedToggle()
         gpio_set_level(_rgb_red_gpio, 1);
 }
 
-void MBoard::ledGreenToggle()
+void ledGreenToggle()
 {
     if (gpio_get_level(_rgb_green_gpio))
         gpio_set_level(_rgb_green_gpio, 0);
@@ -88,7 +84,7 @@ void MBoard::ledGreenToggle()
         gpio_set_level(_rgb_green_gpio, 1);
 }
 
-void MBoard::ledBlueToggle()
+void ledBlueToggle()
 {
     if (gpio_get_level(_rgb_blue_gpio))
         gpio_set_level(_rgb_blue_gpio, 0);
