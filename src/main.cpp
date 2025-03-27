@@ -54,8 +54,8 @@ extern "C" void app_main(void)
     while (1)
     {
         //ledRedToggle();
-        ledGreenToggle();
-        //ledBlueToggle();
+        //ledGreenToggle();
+        ledBlueToggle();
         vTaskDelay(1000 / portTICK_PERIOD_MS);
     }
 }
