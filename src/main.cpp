@@ -4,6 +4,8 @@
  *
  */
 
+//#define MB_TEST
+
 #include <stdio.h>
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
@@ -12,10 +14,17 @@
 #include "esp_log.h"
 #include "project_config.h"
 #include "board.h"
+
+//#include "events.h"
+
+// #ifdef MB_TEST
+// #include "slave_test.h"
+// #else
 #include "slave.h"
+// #endif
+
 #include "sp_uart.h"
 #include "staff.h"
-
 
 extern "C" void app_main(void)
 {
@@ -42,20 +51,32 @@ extern "C" void app_main(void)
   //   //statesInit(true);                       // reStates.h
   //   vTaskDelay(1);
 
-    /* Запуск службы modbus_slave */
+    /* Запуск службы modbus_slave  */
+    #ifdef MB_TEST
     slaveTaskStart();
+    #else
+    slaveTaskStart();
+    #endif
     vTaskDelay(1);
 
-    /* Запуск службы проверки sp */
+
+      /* Запуск службы modbus_slave (Test MB) */
+//    slaveTaskStart();
+//  vTaskDelay(1);
+
+/* Запуск службы проверки sp */
     spTaskStart();
     vTaskDelay(1);
 
     /* Проверка RGB светодиода */
+
+    ledsBlue();
+
     while (1)
     {
         //ledRedToggle();
         //ledGreenToggle();
-        ledBlueToggle();
+        //ledBlueToggle();
         vTaskDelay(1000 / portTICK_PERIOD_MS);
     }
 }

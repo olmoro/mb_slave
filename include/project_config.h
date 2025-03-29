@@ -9,11 +9,16 @@
 #include <stdint.h>
 #include "esp_task.h"
 
+#include <time.h>
+#include <stdio.h>
+//#include <stdint.h>
+#include <stdbool.h>
+#include "esp_bit_defs.h"
 // ------------------------------------------------------------------------
 //                              Версии 
 // ------------------------------------------------------------------------
-#define APP_VERSION "MB_SLAVE 20250327.11"
-// 20250327.11:   Проверка                          RAM: 6.4% Flash: 14.9%
+#define APP_VERSION "MB_SLAVE 20250329.12"
+// 20250327.11:   Проверка (как mb_event)           RAM: 6.4% Flash: 14.9%
 // 20250322.10:  Возврат к версии 07                RAM: 6.4% Flash: 14.9%
 // 20250320.09:                                     RAM: 6.5% Flash: 14.9%
 // 20250320.08:  +mboard                            RAM: 6.4% Flash: 14.9%
@@ -53,4 +58,19 @@
 #define CONFIG_SLAVE_TASK_STACK_SIZE  1024 * 4
 #define CONFIG_SLAVE_TASK_PRIORITY    10
 
+#define CONFIG_EVENTS_TASK_STACK_SIZE  1024 * 4
+#define CONFIG_EVENTS_TASK_PRIORITY    10
 
+// Структура для хранения Modbus пакета
+typedef struct
+{
+    uint8_t function;     // Modbus функция
+    uint8_t *data;        // Указатель на данные
+    uint16_t data_length; // Длина данных
+} modbus_packet_t;
+
+// // Буферы для регистров
+// static uint16_t holding_regs[10] = {0};  // Holding Registers (4xxxx)
+
+#define QUEUE_LENGTH 10        // Максимальное количество элементов в очереди
+#define ITEM_SIZE sizeof(modbus_packet_t)
