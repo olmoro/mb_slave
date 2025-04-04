@@ -61,16 +61,16 @@
 #define CONFIG_EVENTS_TASK_STACK_SIZE  1024 * 4
 #define CONFIG_EVENTS_TASK_PRIORITY    10
 
-// Структура для хранения Modbus пакета
-typedef struct
-{
-    uint8_t function;     // Modbus функция
-    uint8_t *data;        // Указатель на данные
-    uint16_t data_length; // Длина данных
-} modbus_packet_t;
+// // Структура для хранения Modbus пакета
+// typedef struct
+// {
+//     uint8_t function;     // Modbus функция
+//     uint8_t *data;        // Указатель на данные
+//     uint16_t data_length; // Длина данных
+// } modbus_packet_t;
 
-// // Буферы для регистров
-// static uint16_t holding_regs[10] = {0};  // Holding Registers (4xxxx)
+// // // Буферы для регистров
+// // static uint16_t holding_regs[10] = {0};  // Holding Registers (4xxxx)
 
-#define QUEUE_LENGTH 10        // Максимальное количество элементов в очереди
-#define ITEM_SIZE sizeof(modbus_packet_t)
+// #define QUEUE_LENGTH 10        // Максимальное количество элементов в очереди
+// #define ITEM_SIZE sizeof(modbus_packet_t)
